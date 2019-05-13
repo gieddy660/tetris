@@ -1,6 +1,6 @@
 from keyboard import is_pressed
 from random import randint
-from time import sleep, time
+from time import time
 import os
 
 
@@ -131,7 +131,7 @@ class Game:
         self.griglia = [[0 for _ in range(SIZE_X)] for __ in range(SIZE_Y)]
         self.pezzo = Piece(Game.random(), self.SIZE_X, self.SIZE_Y)
         self.next = Piece(Game.random(), self.SIZE_X, self.SIZE_Y)
-        self.timer_pezzi = Timer(1)
+        self.timer_pezzi = Timer(0.5)
         self.timer_refresh = Timer(0.02)
         self.timer_tasti = Timer(0.07)
         self.lines = 0
@@ -220,7 +220,7 @@ class Game:
         self.next = Piece(Game.random(), self.SIZE_X, self.SIZE_Y)
         self.lines += lines
         self.points += int(400 * (lines**2 / 4) * self.level)
-        #TODO: aggiornare livello, e in caso il timer
+        # TODO: aggiornare livello, e in caso il timer
 
     def move_down(self):
         if self.can_move_down():
@@ -254,15 +254,15 @@ class Game:
                 print('|    points: ' + str(self.points))
             elif y == 4:
                 print('|    lines: ' + str(self.lines))
+            elif y >= 7:
+                print('|   ', end='')
+                for x in range(self.SIZE_X):
+                    print(chr(9608) * 2 if self.next.get()[y-7][x] else '  ', end='')
+                print()
             else:
                 print('|')
         print('+' + '-' * self.SIZE_X*2 + '+')
-        print('\n\n')
-        for y in range(self.SIZE_Y):
-            for x in range(self.SIZE_X):
-                print(chr(9608) * 2 if self.next.get()[y][x] else '  ', end='')
-            print()
-        #TODO: stampare livello
+        # TODO: print level
 
     def __call__(self):
         self.timer_tasti.reset()
@@ -280,7 +280,7 @@ class Game:
                 if is_pressed('DOWN'):
                     self.move_down()
                     self.timer_tasti.reset()
-                if is_pressed('UP') and pressable_up :
+                if is_pressed('UP') and pressable_up:
                     self.ruota_dx()
                     self.timer_tasti.reset()
             pressable_up = not is_pressed('UP')
