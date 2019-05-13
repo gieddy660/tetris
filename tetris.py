@@ -269,7 +269,6 @@ class Game:
             else:
                 print('|')
         print('+' + '-' * self.SIZE_X*2 + '+')
-        print(self.timer_pezzi.length)
 
     def __call__(self):
         self.timer_tasti.reset()
