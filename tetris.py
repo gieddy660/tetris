@@ -1,6 +1,6 @@
 from keyboard import is_pressed
 from random import randint
-from time import sleep, time
+from time import time
 import os
 
 
@@ -120,10 +120,12 @@ class Piece:
 
 
 class Game:
+    pieces_index = ['L', 'J', 'I', 'O', 'T', 'S', 'Z']
+    level_speed_index = [100, 1, 0.8, 0.6, 0.5, 0.4, 0.3, 0.2, 0.15, 0.1, 0.05]
+
     @staticmethod
     def random():
-        index = ['L', 'J', 'I', 'O', 'T', 'S', 'Z']  # tirare fuori se serve
-        return index[randint(0, 6)]
+        return Game.pieces_index[randint(0, 6)]
 
     def __init__(self, SIZE_X=10, SIZE_Y=20):
         self.SIZE_X = SIZE_X
@@ -131,7 +133,7 @@ class Game:
         self.griglia = [[0 for _ in range(SIZE_X)] for __ in range(SIZE_Y)]
         self.pezzo = Piece(Game.random(), self.SIZE_X, self.SIZE_Y)
         self.next = Piece(Game.random(), self.SIZE_X, self.SIZE_Y)
-        self.timer_pezzi = Timer(1)
+        self.timer_pezzi = Timer(Game.level_speed_index[1])
         self.timer_refresh = Timer(0.02)
         self.timer_tasti = Timer(0.07)
         self.lines = 0
@@ -219,8 +221,11 @@ class Game:
         self.pezzo = self.next.copy()
         self.next = Piece(Game.random(), self.SIZE_X, self.SIZE_Y)
         self.lines += lines
-        self.points += int(400 * (lines**2 / 4) * self.level)
-        #TODO: aggiornare livello, e in caso il timer
+        self.points += int(100 * (lines**2) * self.level)
+        if self.level * 20 < self.lines:
+            t = self.lines // 20 + 1
+            self.level = t if t < len(Game.level_speed_index) - 1 else len(Game.level_speed_index) - 1
+            self.timer_pezzi = Timer(Game.level_speed_index[self.level])
 
     def move_down(self):
         if self.can_move_down():
@@ -252,17 +257,18 @@ class Game:
                 print(chr(9608) * 2 if self.griglia[y][x] or self.pezzo.get()[y][x] else chr(9594) + chr(9592), end='')
             if y == 1:
                 print('|    points: ' + str(self.points))
-            elif y == 4:
+            elif y == 3:
                 print('|    lines: ' + str(self.lines))
+            elif y == 5:
+                print('|    level: ' + str(self.level))
+            elif y >= 7:
+                print('|   ', end='')
+                for x in range(self.SIZE_X):
+                    print(chr(9608) * 2 if self.next.get()[y-7][x] else '  ', end='')
+                print()
             else:
                 print('|')
         print('+' + '-' * self.SIZE_X*2 + '+')
-        print('\n\n')
-        for y in range(self.SIZE_Y):
-            for x in range(self.SIZE_X):
-                print(chr(9608) * 2 if self.next.get()[y][x] else '  ', end='')
-            print()
-        #TODO: stampare livello
 
     def __call__(self):
         self.timer_tasti.reset()
@@ -280,7 +286,7 @@ class Game:
                 if is_pressed('DOWN'):
                     self.move_down()
                     self.timer_tasti.reset()
-                if is_pressed('UP') and pressable_up :
+                if is_pressed('UP') and pressable_up:
                     self.ruota_dx()
                     self.timer_tasti.reset()
             pressable_up = not is_pressed('UP')
